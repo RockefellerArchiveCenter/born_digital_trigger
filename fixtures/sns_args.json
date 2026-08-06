@@ -1,0 +1,15 @@
+{
+	"containerOverrides": [{
+		"environment": [
+			{
+				"name": "PACKAGE_ID",
+				"value": "20f8da26e268418ead4aa2365f816a08"
+			},
+			{
+				"name": "PACKAGE_DB_ID",
+				"value": "1"
+			}
+		],
+		"name": "born_digital_packaging"
+	}]
+}
