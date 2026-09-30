@@ -3,7 +3,11 @@
 		"environment": [
 			{
 				"name": "PACKAGE_ID",
-				"value": "123456789"
+				"value": "APKAEIBAERJR2EXAMPLE"
+			},
+			{
+				"name": "VIRUS_CHECK_OUTCOME",
+				"value": "NO_THREATS_FOUND"
 			}
 		],
 		"name": "born_digital_validation"

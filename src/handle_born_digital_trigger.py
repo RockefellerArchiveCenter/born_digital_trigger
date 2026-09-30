@@ -122,31 +122,31 @@ def run_task(ecs_client, config, task_definition, environment, object_bytes=0):
 def lambda_handler(event, context):
     """Triggers ECS task."""
 
+    logging.debug(event)
+
     config = get_config(full_config_path)
-    ecs_client = boto3.client(
-        'ecs',
-        region_name=environ.get('AWS_REGION'))
+    ecs_client = boto3.client('ecs', region_name=environ.get('AWS_REGION'))
+    s3_client = boto3.client('s3', region_name=environ.get('AWS_REGION'))
 
-    if event['Records'][0].get('eventSource') == 'aws:s3':
-        """Handles events from S3 buckets."""
+    for record in event['Records']:
 
-        logger.info("Received S3 event")
+        if record.get('source') == 'aws.guardduty':
+            """Handles events from GuardDuty."""
 
-        event_type = event['Records'][0]['eventName']
-        object_bytes = event['Records'][0]['s3']['object']['size']
-        bucket_name = event['Records'][0]['s3']['bucket']['name']
+            logger.info("Received GuardDuty event")
 
-        response = 'Nothing to do for S3 event'
-
-        if event_type in ['ObjectCreated:Put',
-                          'ObjectCreated:CompleteMultipartUpload']:
-            """Handles object creation events."""
-            package_id = event['Records'][0]['s3']['object']['key'].split('.')[
-                0]
+            bucket_name = record['detail']['s3ObjectDetails']['bucketName']
+            package_id = record['detail']['s3ObjectDetails']['objectKey']
+            scan_result = record['detail']['scanResultDetails']['scanResultStatus']
+            object_bytes = s3_client.head_object(Bucket=bucket_name, Key=package_id)['ContentLength']
             environment = [
                 {
                     "name": "PACKAGE_ID",
                     "value": package_id
+                },
+                {
+                    "name": "VIRUS_CHECK_OUTCOME",
+                    "value": scan_result
                 }
             ]
             task_id = run_task(
@@ -155,37 +155,35 @@ def lambda_handler(event, context):
                 'born_digital_validation',
                 environment,
                 object_bytes)
-            response = f"Task {task_id} with definition born_digital_validation started for package {package_id} from bucket {bucket_name}."
+            logging.info(f"Task {task_id} with definition born_digital_validation started for package {package_id} from bucket {bucket_name}.")
 
-    elif event['Records'][0].get('Sns'):
-        """Handles events from SNS."""
+        elif record.get('EventSource') == "aws:sns":
+            """Handles events from Aurora."""
 
-        logger.info("Received SNS event")
+            logger.info("Received Aurora event")
 
-        attributes = event['Records'][0]['Sns']['MessageAttributes']
+            attributes = record['Sns']['MessageAttributes']
 
-        package_id = attributes['package_id']['Value']
-        package_db_id = attributes['package_db_id']['Value']
+            package_id = attributes['package_id']['Value']
+            package_db_id = attributes['package_db_id']['Value']
 
-        environment = [
-            {
-                "name": "PACKAGE_ID",
-                "value": package_id
-            },
-            {
-                "name": "PACKAGE_DB_ID",
-                "value": package_db_id
-            }
-        ]
-        task_id = run_task(
-            ecs_client,
-            config,
-            'born_digital_packaging',
-            environment)
+            environment = [
+                {
+                    "name": "PACKAGE_ID",
+                    "value": package_id
+                },
+                {
+                    "name": "PACKAGE_DB_ID",
+                    "value": package_db_id
+                }
+            ]
+            task_id = run_task(
+                ecs_client,
+                config,
+                'born_digital_packaging',
+                environment)
 
-        response = f"Task {task_id} with definition born_digital_packaging started for package {package_id}."
+            logger.info(f"Task {task_id} with definition born_digital_packaging started for package {package_id}.")
 
-    else:
-        raise Exception('Unsure how to parse message')
-
-    logger.info(response)
+        else:
+            raise Exception('Unsure how to parse message')
