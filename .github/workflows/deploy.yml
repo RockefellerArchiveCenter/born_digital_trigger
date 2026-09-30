@@ -20,7 +20,7 @@ jobs:
 
     env:
       LAMBDA_NAME: born_digital_trigger
-      LAMBDA_HANDLER_CODE: src/born_digital_trigger.py
+      LAMBDA_HANDLER_CODE: src/handle_born_digital_trigger.py
       BASENAME: handle_born_digital_trigger.py
 
     steps:
