@@ -25,11 +25,11 @@ CONFIGS = {
 
 @mock_aws
 @patch('src.handle_born_digital_trigger.get_config')
-def test_s3_args(mock_config):
+def test_guardduty_args(mock_config):
     mock_config.return_value = CONFIGS
-    client = boto3.client("ecs", region_name="us-east-1")
-    client.create_cluster(clusterName=TEST_CLUSTER_NAME)
-    client.register_task_definition(
+    ecs_client = boto3.client("ecs", region_name="us-east-1")
+    ecs_client.create_cluster(clusterName=TEST_CLUSTER_NAME)
+    ecs_client.register_task_definition(
         family="born_digital_validation",
         containerDefinitions=[
             {
@@ -40,29 +40,32 @@ def test_s3_args(mock_config):
             }
         ],
     )
+    s3_client = boto3.client("s3", region_name="us-east-1")
+    s3_client.create_bucket(Bucket="amzn-s3-demo-bucket")
+    s3_client.put_object(Bucket="amzn-s3-demo-bucket", Key="APKAEIBAERJR2EXAMPLE", Body="content")
 
-    with open(Path('fixtures', 's3_put.json'), 'r') as df:
+    with open(Path('fixtures', 'guardduty_msg.json'), 'r') as df:
         message = json.load(df)
         lambda_handler(message, None)
 
-        tasks = client.list_tasks(cluster=TEST_CLUSTER_NAME)
+        tasks = ecs_client.list_tasks(cluster=TEST_CLUSTER_NAME)
         assert len(tasks['taskArns']) == 1
 
-        task_response = client.describe_tasks(
+        task_response = ecs_client.describe_tasks(
             cluster=TEST_CLUSTER_NAME,
             tasks=[tasks['taskArns'][0]])
 
         assert task_response['tasks'][0]['startedBy'] == 'lambda/born_digital_trigger'
         assert task_response['tasks'][0][
             'taskDefinitionArn'] == f"arn:aws:ecs:us-east-1:{DEFAULT_ACCOUNT_ID}:task-definition/born_digital_validation:1"
-        with open(Path('fixtures', 's3_args.json'), 'r') as af:
+        with open(Path('fixtures', 'guardduty_args.json'), 'r') as af:
             args = json.load(af)
             assert task_response['tasks'][0]['overrides'] == args
 
 
 @mock_aws
 @patch('src.handle_born_digital_trigger.get_config')
-def test_sns_args(mock_config):
+def test_aurora_args(mock_config):
     mock_config.return_value = CONFIGS
     client = boto3.client("ecs", region_name="us-east-1")
     client.create_cluster(clusterName=TEST_CLUSTER_NAME)
@@ -78,7 +81,7 @@ def test_sns_args(mock_config):
         ],
     )
 
-    with open(Path('fixtures', 'sns_msg.json'), 'r') as df:
+    with open(Path('fixtures', 'aurora_msg.json'), 'r') as df:
         message = json.load(df)
         lambda_handler(message, None)
 
@@ -92,7 +95,7 @@ def test_sns_args(mock_config):
         assert task_response['tasks'][0]['startedBy'] == 'lambda/born_digital_trigger'
         assert task_response['tasks'][0][
             'taskDefinitionArn'] == f"arn:aws:ecs:us-east-1:{DEFAULT_ACCOUNT_ID}:task-definition/born_digital_packaging:1"
-        with open(Path('fixtures', 'sns_args.json'), 'r') as af:
+        with open(Path('fixtures', 'aurora_args.json'), 'r') as af:
             args = json.load(af)
             assert task_response['tasks'][0]['overrides'] == args
 
