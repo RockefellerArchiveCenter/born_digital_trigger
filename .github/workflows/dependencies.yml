@@ -39,7 +39,7 @@ jobs:
         run: pip-compile --upgrade --no-header tests/test_requirements.in -o tests/test_requirements.txt
       
       - name: Run GitHub Actions Version Updater
-        uses: saadmk11/github-actions-version-updater@v1
+        uses: saadmk11/github-actions-version-updater@v1.0.3
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           skip_pull_request: "true"
