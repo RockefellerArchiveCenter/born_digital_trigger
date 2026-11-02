@@ -8,6 +8,10 @@
 			{
 				"name": "VIRUS_CHECK_OUTCOME",
 				"value": "NO_THREATS_FOUND"
+			},
+			{
+				"name": "SOURCE_BUCKET",
+				"value": "amzn-s3-demo-bucket"
 			}
 		],
 		"name": "born_digital_validation"

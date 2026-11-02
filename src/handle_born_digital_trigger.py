@@ -147,6 +147,10 @@ def lambda_handler(event, context):
                 {
                     "name": "VIRUS_CHECK_OUTCOME",
                     "value": scan_result
+                },
+                {
+                    "name": "SOURCE_BUCKET",
+                    "value": bucket_name
                 }
             ]
             task_id = run_task(

@@ -25,7 +25,9 @@ jobs:
           python-version: '3.12'
 
       - name: Install pre-commit and pip-tools
-        run: pip install pre-commit pip-tools
+        run: |
+          python -m pip install --upgrade "pip>=26.2.2"
+          pip install pre-commit pip-tools
 
       - name: Run pre-commit autoupdate
         run: pre-commit autoupdate
@@ -37,7 +39,7 @@ jobs:
         run: pip-compile --upgrade --no-header tests/test_requirements.in -o tests/test_requirements.txt
       
       - name: Run GitHub Actions Version Updater
-        uses: saadmk11/github-actions-version-updater@v1
+        uses: saadmk11/github-actions-version-updater@v1.0.3
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           skip_pull_request: "true"
