@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: ${{ github.ref_name }}
+      name: ${{ github.event_name == 'release' && 'base' || github.ref_name }}
 
     env:
       LAMBDA_NAME: born_digital_trigger
