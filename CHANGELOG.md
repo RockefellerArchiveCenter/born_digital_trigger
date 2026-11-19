@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/RockefellerArchiveCenter/born_digital_trigger/compare/v1.0.0...v1.0.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* deploy update ([7a0f77e](https://github.com/RockefellerArchiveCenter/born_digital_trigger/commit/7a0f77eb1bd7d007f3ef65b6806f3652c43d39a0))
+* update deploy ([db0cd93](https://github.com/RockefellerArchiveCenter/born_digital_trigger/commit/db0cd934440a2613539190461e16ff7c82284939))
+* update deploy ([eedddfe](https://github.com/RockefellerArchiveCenter/born_digital_trigger/commit/eedddfe232ab2b424d05e52c06f3012cc58f9d57))
+
 ## 1.0.0 (2026-11-02)
 
 
